@@ -5,12 +5,21 @@ const doneBtn = document.getElementById("doneBtn");
 
 const state = {
   todos: [],
+  filter: "all", // Filter für die anzuzeigenden ToDos
 };
 
 function render() {
   // Clear the current list
   toDoList.innerHTML = "";
-  state.todos.forEach((notes) => {
+
+  // Filtern der ToDo-Items basierend auf dem aktuellen Filterstatus
+  const filteredTodos = state.todos.filter((todo) => {
+    if (state.filter === "open") return !todo.done;
+    if (state.filter === "done") return todo.done;
+    return true; // 'all' oder unbekannter Filter zeigt alle ToDos
+  });
+
+  filteredTodos.forEach((notes) => {
     const li = document.createElement("li");
 
     const checkBox = document.createElement("input");
@@ -47,16 +56,13 @@ function loadTodosFromLocalStorage() {
   }
 }
 
-document.getElementById("todoForm").addEventListener("submit", (event) => {
-  event.preventDefault(); // Prevent form submission
-  // Filter duplicates
+function addTodo() {
   const inputField = inputFieldEl.value.trim();
   const found = state.todos.find(
     (element) => element.description === inputField
   );
-  console.log(found);
 
-  if (inputField == "" || found !== undefined) return;
+  if (inputField === "" || found !== undefined) return;
 
   state.todos.push({
     description: inputField,
@@ -67,12 +73,21 @@ document.getElementById("todoForm").addEventListener("submit", (event) => {
   saveTodosToLocalStorage();
   render();
   inputFieldEl.value = "";
+}
+
+document.getElementById("todoForm").addEventListener("submit", (event) => {
+  event.preventDefault(); // Prevent form submission
+  addTodo();
+});
+
+// Add EventListener for the Add ToDo button
+btn.addEventListener("click", (event) => {
+  event.preventDefault(); // Prevent form submission
+  addTodo();
 });
 
 doneBtn.addEventListener("click", (event) => {
   event.preventDefault(); // Prevent form submission
-
-  //todos = [...newSet(todos)]; wrong approach
 
   // Filter out the completed todos
   state.todos = state.todos.filter((notes) => !notes.done);
